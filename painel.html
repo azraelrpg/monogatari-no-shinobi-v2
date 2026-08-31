@@ -1,6 +1,6 @@
-<div id="shinobi-panel-root" class="shinobi-app">
+<div id="shinobi-panel-root" class="shinobi-app auth-pending">
   <style>
-    html.auth-pending body{visibility:hidden}
+    #shinobi-panel-root.auth-pending{visibility:hidden}
     #shinobi-panel-root{--ink:#171a1f;--muted:#6f746f;--paper:#eee3c8;--paper2:#e4d3aa;--line:#b79c69;--dark:#171c1d;--dark2:#222a29;--chakra:#3d8db8;--chakra2:#7cc8df;--hp:#b94d43;--good:#4d7655;--warn:#b47a31;--bad:#9e3e38;min-height:100%;background:light-dark(#d8cfb8,#101414);color:light-dark(#1d211f,#f1ead9);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;border-radius:0;padding:0;overflow:hidden}
     #shinobi-panel-root *{box-sizing:border-box}
     #shinobi-panel-root button,#shinobi-panel-root input,#shinobi-panel-root select,#shinobi-panel-root textarea{font:inherit}
@@ -409,66 +409,71 @@
 
       async function persistPanel(manual){
         if (restoringSavedState) return;
+        if (typeof window.__shinobiPanelCloudSave !== 'function'){
+          if (manual) globalMsg.textContent='Conectando ao salvamento online...';
+          return false;
+        }
+
         const state = collectPanelState();
+
         try {
-          await databasePut(state);
-          try { localStorage.removeItem(storageFallbackId); } catch (_) {}
-          if (manual) { globalMsg.textContent='Ficha salva neste navegador.'; flashSaved(); }
-          return true;
-        } catch (_) {
-          try {
-            localStorage.setItem(storageFallbackId,JSON.stringify(state));
-            if (manual) { globalMsg.textContent='Ficha salva neste navegador.'; flashSaved(); }
-            return true;
-          } catch (err) {
-            if (state.photo) {
-              try {
-                const lightState = {...state,photo:''};
-                localStorage.setItem(storageFallbackId,JSON.stringify(lightState));
-                if (manual) { globalMsg.textContent='Ficha salva. A foto não pôde ser armazenada permanentemente neste navegador.'; flashSaved(); }
-                return true;
-              } catch (_) {}
-            }
-            if (manual) globalMsg.textContent='Não foi possível salvar neste navegador. Verifique as permissões de armazenamento.';
-            return false;
+          if (manual) globalMsg.textContent='Salvando painel online...';
+          await window.__shinobiPanelCloudSave(state);
+          if (manual) {
+            globalMsg.textContent='Painel salvo online com sucesso.';
+            flashSaved();
           }
+          return true;
+        } catch (err) {
+          console.error('Falha ao salvar painel no Firestore:', err);
+          globalMsg.textContent='Não foi possível salvar o painel online. Verifique sua conexão.';
+          return false;
         }
       }
 
       function scheduleAutoSave(){
         if (restoringSavedState) return;
         clearTimeout(autoSaveTimer);
-        autoSaveTimer=setTimeout(() => { persistPanel(false); },280);
+        autoSaveTimer=setTimeout(() => { persistPanel(false); },1000);
       }
 
-      async function loadSavedPanel(){
-        let state=null;
-        try { state=await databaseGet(); } catch (_) {}
-        if (!state) {
-          try { state=JSON.parse(localStorage.getItem(storageFallbackId) || 'null'); } catch (_) { state=null; }
-        }
+      function applySavedPanel(state){
         if (!state || typeof state !== 'object') return false;
         restoringSavedState=true;
         try {
           root.querySelector('#sp-name').value=String(state.name || '').slice(0,40);
           root.querySelector('#sp-clan').value=String(state.clan || '').slice(0,28);
           root.querySelector('#sp-village').value=String(state.village || '').slice(0,36);
+
           const rank=root.querySelector('#sp-rank');
           if (Array.from(rank.options).some(opt => opt.value === state.rank)) rank.value=state.rank;
+
           const stance=root.querySelector('#sp-stance');
           if (Array.from(stance.options).some(opt => opt.value === state.stance)) stance.value=state.stance;
+
           if (conditionData[state.condition]) condition.value=state.condition;
+
           hp.value=clamp(parseInt(state.hp,10),0,100);
           chakraMax.value=clamp(parseInt(state.chakraMax,10),1,9999);
           chakraCurrent.value=clamp(parseInt(state.chakraCurrent,10),0,parseInt(chakraMax.value,10));
           notes.value=String(state.notes || '').slice(0,1200);
-          effects=Array.isArray(state.effects) ? state.effects.map(x => String(x).slice(0,32)).filter(Boolean).slice(0,12) : [];
-          inventory=Array.isArray(state.inventory) ? state.inventory.map(item => ({
-            name:String(item && item.name || '').slice(0,42),
-            type:String(item && item.type || 'Outro'),
-            qty:clamp(parseInt(item && item.qty,10),1,999)
-          })).filter(item => item.name).slice(0,30) : [];
-          savedPhotoData=typeof state.photo === 'string' && state.photo.startsWith('data:image/') ? state.photo : '';
+
+          effects=Array.isArray(state.effects)
+            ? state.effects.map(x => String(x).slice(0,32)).filter(Boolean).slice(0,12)
+            : [];
+
+          inventory=Array.isArray(state.inventory)
+            ? state.inventory.map(item => ({
+                name:String(item && item.name || '').slice(0,42),
+                type:String(item && item.type || 'Outro'),
+                qty:clamp(parseInt(item && item.qty,10),1,999)
+              })).filter(item => item.name).slice(0,30)
+            : [];
+
+          savedPhotoData=typeof state.photo === 'string' && state.photo.startsWith('data:image/')
+            ? state.photo
+            : '';
+
           if (savedPhotoData) {
             photo.src=savedPhotoData;
             photo.style.display='block';
@@ -478,16 +483,27 @@
             photo.style.display='none';
             photoPlaceholder.style.display='block';
           }
+
           count.textContent=notes.value.length + ' / 1200 caracteres';
-          renderHp(); renderChakra(false); renderCondition(); renderEffects(); renderInventory();
+          renderHp();
+          renderChakra(false);
+          renderCondition();
+          renderEffects();
+          renderInventory();
           return true;
-        } finally { restoringSavedState=false; }
+        } finally {
+          restoringSavedState=false;
+        }
       }
+
+      window.__shinobiPanelApplyState = applySavedPanel;
+      window.__shinobiPanelCollectState = collectPanelState;
 
       async function clearSavedPanel(){
         clearTimeout(autoSaveTimer);
-        try { await databaseDelete(); } catch (_) {}
-        try { localStorage.removeItem(storageFallbackId); } catch (_) {}
+        if (typeof window.__shinobiPanelCloudDelete === 'function'){
+          await window.__shinobiPanelCloudDelete();
+        }
       }
 
       function renderHp(){
@@ -657,22 +673,84 @@
 
       notes.addEventListener('input',() => { count.textContent = notes.value.length + ' / 1200 caracteres'; });
 
-      photoInput.addEventListener('change',() => {
+      function compressPanelPhoto(file){
+        return new Promise((resolve,reject) => {
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            const img = new Image();
+
+            img.onload = () => {
+              try{
+                const maxW = 600;
+                const maxH = 750;
+                const scale = Math.min(1, maxW / img.width, maxH / img.height);
+                const width = Math.max(1, Math.round(img.width * scale));
+                const height = Math.max(1, Math.round(img.height * scale));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img,0,0,width,height);
+
+                let data = canvas.toDataURL('image/jpeg',0.72);
+
+                // Segunda compressão de segurança para manter o documento
+                // confortavelmente abaixo do limite do Firestore.
+                if (data.length > 600000){
+                  const smallScale = Math.min(1,480 / width,600 / height);
+                  const small = document.createElement('canvas');
+                  small.width = Math.max(1,Math.round(width * smallScale));
+                  small.height = Math.max(1,Math.round(height * smallScale));
+                  small.getContext('2d').drawImage(img,0,0,small.width,small.height);
+                  data = small.toDataURL('image/jpeg',0.64);
+                }
+
+                resolve(data);
+              }catch(err){
+                reject(err);
+              }
+            };
+
+            img.onerror = () => reject(new Error('Imagem inválida.'));
+            img.src = String(reader.result);
+          };
+
+          reader.onerror = () => reject(reader.error || new Error('Falha ao ler a imagem.'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      photoInput.addEventListener('change',async() => {
         const file = photoInput.files && photoInput.files[0];
         if (!file) return;
-        if (!['image/png','image/jpeg','image/webp'].includes(file.type)) { globalMsg.textContent = 'Use uma imagem PNG, JPG ou WEBP.'; photoInput.value=''; return; }
-        if (file.size > 8 * 1024 * 1024) { globalMsg.textContent = 'A imagem é muito grande. Escolha um arquivo de até 8 MB.'; photoInput.value=''; return; }
-        const reader = new FileReader();
-        reader.onload = () => {
-          savedPhotoData=String(reader.result);
+
+        if (!['image/png','image/jpeg','image/webp'].includes(file.type)) {
+          globalMsg.textContent='Use uma imagem PNG, JPG ou WEBP.';
+          photoInput.value='';
+          return;
+        }
+
+        if (file.size > 8 * 1024 * 1024) {
+          globalMsg.textContent='A imagem é muito grande. Escolha um arquivo de até 8 MB.';
+          photoInput.value='';
+          return;
+        }
+
+        try{
+          globalMsg.textContent='Preparando retrato...';
+          savedPhotoData=await compressPanelPhoto(file);
           photo.src=savedPhotoData;
           photo.style.display='block';
           photoPlaceholder.style.display='none';
-          globalMsg.textContent='Retrato atualizado.';
+          globalMsg.textContent='Retrato atualizado. Salvando online...';
           scheduleAutoSave();
-        };
-        reader.onerror = () => { globalMsg.textContent='Não foi possível carregar essa imagem.'; };
-        reader.readAsDataURL(file);
+        }catch(err){
+          console.error('Falha ao processar retrato:',err);
+          globalMsg.textContent='Não foi possível carregar essa imagem.';
+        }
       });
 
       async function resetPanel(){
@@ -705,7 +783,7 @@
         renderHp(); renderChakra(false); renderCondition(); renderEffects(); renderInventory();
         await clearSavedPanel();
         restoringSavedState=false;
-        globalMsg.textContent='Ficha limpa e salvamento anterior removido.';
+        globalMsg.textContent='Painel reiniciado e salvamento online removido.';
       }
 
       root.querySelector('#sp-reset').addEventListener('click',resetPanel);
@@ -736,37 +814,7 @@
               Array.from(target.options).forEach((opt,i) => { if (i === control.selectedIndex) opt.setAttribute('selected','selected'); else opt.removeAttribute('selected'); });
             } else if (control.type !== 'file') target.setAttribute('value',control.value);
           });
-          const doc = '<!doctype html><html lang="pt-BR" style="margin:0;min-height:100%;background:#050708"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#050708"><title>Painel Shinobi</title></head><body style="margin:0;padding:0;min-height:100%;background:#050708;overflow-x:hidden">' + clone.outerHTML + '
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
-      authDomain: "monogatari-no-shinobi.firebaseapp.com",
-      projectId: "monogatari-no-shinobi",
-      storageBucket: "monogatari-no-shinobi.firebasestorage.app",
-      messagingSenderId: "304493645200",
-      appId: "1:304493645200:web:0777f1677b6fb662587715"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.replace("index.html");
-        return;
-      }
-
-      document.documentElement.classList.remove("auth-pending");
-    });
-  </script>
-
-</body></html>';
+          const doc = '<!doctype html><html lang="pt-BR" style="margin:0;min-height:100%;background:#050708"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#050708"><title>Painel Shinobi</title></head><body style="margin:0;padding:0;min-height:100%;background:#050708;overflow-x:hidden">' + clone.outerHTML + '</body></html>';
           const blob = new Blob([doc],{type:'text/html;charset=utf-8'});
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -788,9 +836,85 @@
       renderCondition();
       renderEffects();
       renderInventory();
-      loadSavedPanel().then((loaded) => {
-        if (loaded) globalMsg.textContent='Ficha salva restaurada automaticamente.';
-      }).catch(() => {});
     })();
   </script>
 </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import {
+    getAuth,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    deleteDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
+    authDomain: "monogatari-no-shinobi.firebaseapp.com",
+    projectId: "monogatari-no-shinobi",
+    storageBucket: "monogatari-no-shinobi.firebasestorage.app",
+    messagingSenderId: "304493645200",
+    appId: "1:304493645200:web:0777f1677b6fb662587715"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+  const auth = getAuth(firebaseApp);
+  const db = getFirestore(firebaseApp);
+  const root = document.getElementById("shinobi-panel-root");
+  const globalMsg = document.getElementById("sp-global-msg");
+
+  let currentUser = null;
+
+  window.__shinobiPanelCloudSave = async (state) => {
+    if (!currentUser) throw new Error("Usuário não autenticado.");
+
+    await setDoc(
+      doc(db,"paineis",currentUser.uid),
+      {
+        ...state,
+        updatedAt: serverTimestamp()
+      }
+    );
+  };
+
+  window.__shinobiPanelCloudDelete = async () => {
+    if (!currentUser) throw new Error("Usuário não autenticado.");
+    await deleteDoc(doc(db,"paineis",currentUser.uid));
+  };
+
+  onAuthStateChanged(auth,async(user) => {
+    if (!user){
+      window.location.replace("index.html");
+      return;
+    }
+
+    currentUser=user;
+
+    try{
+      globalMsg.textContent="Carregando painel online...";
+      const snapshot=await getDoc(doc(db,"paineis",user.uid));
+
+      if(snapshot.exists()){
+        if(typeof window.__shinobiPanelApplyState === "function"){
+          window.__shinobiPanelApplyState(snapshot.data());
+        }
+        globalMsg.textContent="Painel online carregado.";
+      }else{
+        globalMsg.textContent="Painel pronto. Seu primeiro salvamento será criado automaticamente.";
+      }
+    }catch(error){
+      console.error("Falha ao carregar painel do Firestore:",error);
+      globalMsg.textContent="Não foi possível carregar o painel online. Verifique sua conexão.";
+    }finally{
+      root.classList.remove("auth-pending");
+    }
+  });
+</script>
+
