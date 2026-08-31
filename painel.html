@@ -856,13 +856,13 @@
   } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
-    authDomain: "monogatari-no-shinobi.firebaseapp.com",
-    projectId: "monogatari-no-shinobi",
-    storageBucket: "monogatari-no-shinobi.firebasestorage.app",
-    messagingSenderId: "304493645200",
-    appId: "1:304493645200:web:0777f1677b6fb662587715"
-  };
+      apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
+      authDomain: "monogatari-no-shinobi.firebaseapp.com",
+      projectId: "monogatari-no-shinobi",
+      storageBucket: "monogatari-no-shinobi.firebasestorage.app",
+      messagingSenderId: "304493645200",
+      appId: "1:304493645200:web:0777f1677b6fb662587715"
+    };
 
   const firebaseApp = initializeApp(firebaseConfig);
   const auth = getAuth(firebaseApp);
@@ -871,12 +871,32 @@
   const globalMsg = document.getElementById("sp-global-msg");
 
   let currentUser = null;
+  let targetUserId = null;
+  let viewingAnotherPlayer = false;
+
+  async function resolveTargetUser(user) {
+    const requestedUid = (new URLSearchParams(window.location.search).get("uid") || "").trim();
+
+    if (!requestedUid || requestedUid === user.uid) {
+      return user.uid;
+    }
+
+    const adminSnapshot = await getDoc(doc(db, "admins", user.uid));
+
+    if (!adminSnapshot.exists() || adminSnapshot.data().admin !== true) {
+      window.location.replace("inicio.html");
+      throw new Error("Acesso administrativo necessário.");
+    }
+
+    viewingAnotherPlayer = true;
+    return requestedUid;
+  }
 
   window.__shinobiPanelCloudSave = async (state) => {
-    if (!currentUser) throw new Error("Usuário não autenticado.");
+    if (!currentUser || !targetUserId) throw new Error("Usuário não autenticado.");
 
     await setDoc(
-      doc(db,"paineis",currentUser.uid),
+      doc(db,"paineis",targetUserId),
       {
         ...state,
         updatedAt: serverTimestamp()
@@ -885,8 +905,8 @@
   };
 
   window.__shinobiPanelCloudDelete = async () => {
-    if (!currentUser) throw new Error("Usuário não autenticado.");
-    await deleteDoc(doc(db,"paineis",currentUser.uid));
+    if (!currentUser || !targetUserId) throw new Error("Usuário não autenticado.");
+    await deleteDoc(doc(db,"paineis",targetUserId));
   };
 
   onAuthStateChanged(auth,async(user) => {
@@ -898,20 +918,33 @@
     currentUser=user;
 
     try{
-      globalMsg.textContent="Carregando painel online...";
-      const snapshot=await getDoc(doc(db,"paineis",user.uid));
+      targetUserId = await resolveTargetUser(user);
+
+      globalMsg.textContent = viewingAnotherPlayer
+        ? "Carregando painel do jogador..."
+        : "Carregando painel online...";
+
+      const snapshot=await getDoc(doc(db,"paineis",targetUserId));
 
       if(snapshot.exists()){
         if(typeof window.__shinobiPanelApplyState === "function"){
           window.__shinobiPanelApplyState(snapshot.data());
         }
-        globalMsg.textContent="Painel online carregado.";
+
+        globalMsg.textContent = viewingAnotherPlayer
+          ? "Painel do jogador carregado. Alterações serão salvas neste registro."
+          : "Painel online carregado.";
       }else{
-        globalMsg.textContent="Painel pronto. Seu primeiro salvamento será criado automaticamente.";
+        globalMsg.textContent = viewingAnotherPlayer
+          ? "Este jogador ainda não possui um painel salvo. Qualquer alteração criará o registro."
+          : "Painel pronto. Seu primeiro salvamento será criado automaticamente.";
       }
     }catch(error){
       console.error("Falha ao carregar painel do Firestore:",error);
-      globalMsg.textContent="Não foi possível carregar o painel online. Verifique sua conexão.";
+
+      if (error && error.message === "Acesso administrativo necessário.") return;
+
+      globalMsg.textContent="Não foi possível carregar o painel online.";
     }finally{
       root.classList.remove("auth-pending");
     }

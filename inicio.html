@@ -289,6 +289,23 @@
       background:linear-gradient(90deg,#24576d,#4a9cc0,#74bed9,#d7b35e);
     }
 
+    .portal-card.master{
+      display:none;
+      grid-column:1 / -1;
+      min-height:230px;
+    }
+
+    .portal-card.master.is-visible{display:flex}
+
+    .portal-card.master::before{
+      background:linear-gradient(90deg,#5e3d16,#b27b2e,#d7b35e,#e7d08e);
+    }
+
+    .portal-card.master .card-icon{
+      border-color:#6c5730;
+      color:#e0c57b;
+    }
+
     .card-symbol{
       position:absolute;
       right:18px;
@@ -387,6 +404,7 @@
     @media(max-width:760px){
       .grid{grid-template-columns:1fr}
       .portal-card{min-height:245px}
+      .portal-card.master{grid-column:auto}
       .hero{min-height:255px}
     }
 
@@ -472,6 +490,25 @@
           <span class="arrow">→</span>
         </div>
       </a>
+
+      <a class="portal-card master" id="master-card" href="mestre.html" aria-hidden="true">
+        <span class="card-symbol" aria-hidden="true">影</span>
+        <div>
+          <div class="card-icon" aria-hidden="true">影</div>
+          <div class="card-content">
+            <div class="card-kicker">Acesso Administrativo</div>
+            <h3>Painel do Mestre</h3>
+            <p>
+              Consulte os shinobi cadastrados e acesse as fichas e os painéis
+              individuais dos jogadores autorizados da campanha.
+            </p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Abrir administração</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
     </section>
 
     <div class="bottom-note">Monogatari no Shinobi • Registro de acesso reservado</div>
@@ -484,6 +521,11 @@
       onAuthStateChanged,
       signOut
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
@@ -496,15 +538,29 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
     const logoutButton = document.getElementById("logout-btn");
+    const masterCard = document.getElementById("master-card");
 
     let authResolved = false;
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       authResolved = true;
 
       if (!user) {
         window.location.replace("index.html");
+        return;
+      }
+
+      try {
+        const adminSnapshot = await getDoc(doc(db, "admins", user.uid));
+
+        if (adminSnapshot.exists() && adminSnapshot.data().admin === true) {
+          masterCard.classList.add("is-visible");
+          masterCard.setAttribute("aria-hidden", "false");
+        }
+      } catch (error) {
+        console.error("Não foi possível verificar o acesso de Mestre:", error);
       }
     });
 
@@ -522,7 +578,6 @@
       }
     });
 
-    // Evita que a página seja restaurada do cache após logout.
     window.addEventListener("pageshow", (event) => {
       if (event.persisted && authResolved && !auth.currentUser) {
         window.location.replace("index.html");

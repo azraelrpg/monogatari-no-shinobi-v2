@@ -682,12 +682,32 @@
     const status = document.getElementById("status");
 
     let currentUser = null;
+    let targetUserId = null;
+    let viewingAnotherPlayer = false;
+
+    async function resolveTargetUser(user) {
+      const requestedUid = (new URLSearchParams(window.location.search).get("uid") || "").trim();
+
+      if (!requestedUid || requestedUid === user.uid) {
+        return user.uid;
+      }
+
+      const adminSnapshot = await getDoc(doc(db, "admins", user.uid));
+
+      if (!adminSnapshot.exists() || adminSnapshot.data().admin !== true) {
+        window.location.replace("inicio.html");
+        throw new Error("Acesso administrativo necessário.");
+      }
+
+      viewingAnotherPlayer = true;
+      return requestedUid;
+    }
 
     window.__shinobiCloudSave = async (data) => {
-      if (!currentUser) throw new Error("Usuário não autenticado.");
+      if (!currentUser || !targetUserId) throw new Error("Usuário não autenticado.");
 
       await setDoc(
-        doc(db, "fichas", currentUser.uid),
+        doc(db, "fichas", targetUserId),
         {
           ...data,
           updatedAt: serverTimestamp()
@@ -696,8 +716,8 @@
     };
 
     window.__shinobiCloudDelete = async () => {
-      if (!currentUser) throw new Error("Usuário não autenticado.");
-      await deleteDoc(doc(db, "fichas", currentUser.uid));
+      if (!currentUser || !targetUserId) throw new Error("Usuário não autenticado.");
+      await deleteDoc(doc(db, "fichas", targetUserId));
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -709,21 +729,33 @@
       currentUser = user;
 
       try {
-        status.textContent = "Carregando ficha online...";
+        targetUserId = await resolveTargetUser(user);
 
-        const snapshot = await getDoc(doc(db, "fichas", user.uid));
+        status.textContent = viewingAnotherPlayer
+          ? "Carregando ficha do jogador..."
+          : "Carregando ficha online...";
+
+        const snapshot = await getDoc(doc(db, "fichas", targetUserId));
 
         if (snapshot.exists()) {
           if (typeof window.__shinobiSheetApplyData === "function") {
             window.__shinobiSheetApplyData(snapshot.data());
           }
-          status.textContent = "Ficha online carregada.";
+
+          status.textContent = viewingAnotherPlayer
+            ? "Ficha do jogador carregada. Alterações serão salvas neste registro."
+            : "Ficha online carregada.";
         } else {
-          status.textContent = "Ficha pronta. Seu primeiro salvamento será criado automaticamente.";
+          status.textContent = viewingAnotherPlayer
+            ? "Este jogador ainda não possui uma ficha salva. Qualquer alteração criará o registro."
+            : "Ficha pronta. Seu primeiro salvamento será criado automaticamente.";
         }
       } catch (error) {
         console.error("Falha ao carregar ficha do Firestore:", error);
-        status.textContent = "Não foi possível carregar a ficha online. Verifique sua conexão.";
+
+        if (error && error.message === "Acesso administrativo necessário.") return;
+
+        status.textContent = "Não foi possível carregar a ficha online.";
       } finally {
         document.documentElement.classList.remove("auth-pending");
       }
