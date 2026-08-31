@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="auth-pending">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ficha Shinobi — Naruto RPG</title>
   <style>
+    html.auth-pending body{visibility:hidden}
     :root{
       --bg:#07090b;--bg2:#0d1114;--panel:#12171a;--panel2:#0d1113;--line:#31393a;
       --red:#c84434;--red2:#7f2822;--orange:#e57931;--gold:#d7b35f;--gold2:#806633;
@@ -622,5 +623,35 @@
     updateSummary();
   })();
   </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
+      authDomain: "monogatari-no-shinobi.firebaseapp.com",
+      projectId: "monogatari-no-shinobi",
+      storageBucket: "monogatari-no-shinobi.firebasestorage.app",
+      messagingSenderId: "304493645200",
+      appId: "1:304493645200:web:0777f1677b6fb662587715"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      document.documentElement.classList.remove("auth-pending");
+    });
+  </script>
+
 </body>
 </html>
