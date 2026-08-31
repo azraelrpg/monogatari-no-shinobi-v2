@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Monogatari no Shinobi — Portal de Acesso</title>
+  <style>
+    :root{
+      --bg:#080a0c;
+      --bg2:#0d1113;
+      --panel:#121719;
+      --panel2:#0b0f11;
+      --border:#30383a;
+      --text:#f5eddd;
+      --muted:#909b97;
+      --muted2:#66706d;
+      --red:#bb4334;
+      --red2:#70231d;
+      --orange:#eb7a31;
+      --gold:#d6b361;
+      --gold2:#8e7139;
+      --chakra:#4c9fc3;
+      --success:#73b58b;
+      --danger:#e26a5d;
+      --shadow:0 30px 90px rgba(0,0,0,.5);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:#080a0c;
+      color:var(--text);
+    }
+
+    body{
+      min-height:100vh;
+      font-family:Inter,"Trebuchet MS",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 12% 10%,rgba(187,67,52,.20),transparent 30%),
+        radial-gradient(circle at 86% 14%,rgba(235,122,49,.09),transparent 24%),
+        radial-gradient(circle at 82% 88%,rgba(76,159,195,.08),transparent 27%),
+        linear-gradient(135deg,#07090b 0%,#0c1012 48%,#080a0c 100%);
+      overflow-x:hidden;
+    }
+
+    body::before,
+    body::after{
+      content:"";
+      position:fixed;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    body::before{
+      width:600px;
+      height:600px;
+      right:-270px;
+      top:40px;
+      opacity:.22;
+      border:1px solid rgba(214,179,97,.18);
+      border-radius:50%;
+      box-shadow:
+        inset 0 0 0 28px rgba(214,179,97,.012),
+        inset 0 0 0 60px rgba(214,179,97,.008),
+        inset 0 0 0 96px rgba(214,179,97,.005);
+    }
+
+    body::after{
+      content:"忍";
+      left:-50px;
+      bottom:-130px;
+      color:rgba(214,179,97,.03);
+      font-family:Georgia,serif;
+      font-size:380px;
+      font-weight:900;
+      transform:rotate(-8deg);
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(1180px,calc(100% - 28px));
+      margin:0 auto;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:28px 0;
+    }
+
+    .shell{
+      width:100%;
+      min-height:650px;
+      display:grid;
+      grid-template-columns:minmax(0,1.08fr) minmax(390px,.82fr);
+      overflow:hidden;
+      border:1px solid var(--border);
+      border-radius:22px;
+      background:#0b0e10;
+      box-shadow:var(--shadow);
+    }
+
+    .brand{
+      position:relative;
+      min-width:0;
+      padding:clamp(34px,5vw,68px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      background:
+        radial-gradient(circle at 8% 4%,rgba(187,67,52,.29),transparent 30%),
+        radial-gradient(circle at 83% 78%,rgba(235,122,49,.09),transparent 29%),
+        linear-gradient(145deg,#111517 0%,#181d1f 52%,#0c1012 100%);
+      border-right:1px solid #342f29;
+    }
+
+    .brand::before{
+      content:"火";
+      position:absolute;
+      right:-18px;
+      top:-82px;
+      color:rgba(214,179,97,.045);
+      font-family:Georgia,serif;
+      font-size:325px;
+      font-weight:900;
+      transform:rotate(-4deg);
+    }
+
+    .brand::after{
+      content:"";
+      position:absolute;
+      inset:20px;
+      border:1px solid rgba(214,179,97,.07);
+      border-radius:16px;
+      pointer-events:none;
+    }
+
+    .brand-top,
+    .brand-main,
+    .brand-bottom{
+      position:relative;
+      z-index:1;
+    }
+
+    .seal{
+      width:70px;
+      height:70px;
+      display:grid;
+      place-items:center;
+      border:1px solid #9d8048;
+      border-radius:17px;
+      background:linear-gradient(145deg,#2c2119,#111516);
+      box-shadow:inset 0 0 0 6px rgba(214,179,97,.035),0 12px 30px rgba(0,0,0,.34);
+      transform:rotate(45deg);
+    }
+
+    .seal span{
+      color:#e3c87f;
+      font-family:Georgia,serif;
+      font-size:29px;
+      line-height:1;
+      transform:rotate(-45deg);
+    }
+
+    .eyebrow{
+      margin-top:24px;
+      color:#c3aa72;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+    }
+
+    .brand h1{
+      margin:10px 0 0;
+      max-width:620px;
+      color:#fff7e8;
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(42px,6vw,72px);
+      line-height:.95;
+      letter-spacing:-.05em;
+    }
+
+    .brand h1 span{
+      display:block;
+      margin-top:5px;
+      color:#c84a38;
+      text-shadow:0 10px 35px rgba(187,67,52,.22);
+    }
+
+    .brand p{
+      max-width:640px;
+      margin:23px 0 0;
+      color:#a2aca8;
+      font-size:14px;
+      line-height:1.75;
+    }
+
+    .features{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin-top:34px;
+    }
+
+    .feature{
+      min-width:0;
+      padding:13px 14px;
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:10px;
+      background:rgba(8,11,12,.63);
+    }
+
+    .feature b{
+      display:block;
+      margin-bottom:5px;
+      color:#dac493;
+      font-size:9px;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+    }
+
+    .feature span{
+      display:block;
+      color:#78837f;
+      font-size:11px;
+      line-height:1.45;
+    }
+
+    .brand-bottom{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:30px;
+      color:#716c60;
+      font-size:10px;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+    }
+
+    .dot{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:var(--red);
+      box-shadow:0 0 12px rgba(187,67,52,.6);
+    }
+
+    .login-side{
+      position:relative;
+      min-width:0;
+      padding:clamp(30px,4vw,54px);
+      display:flex;
+      align-items:center;
+      background:
+        linear-gradient(rgba(11,15,17,.96),rgba(11,15,17,.98)),
+        repeating-linear-gradient(45deg,transparent 0 8px,rgba(255,255,255,.015) 8px 9px);
+    }
+
+    .login-side::before{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      top:0;
+      height:4px;
+      background:linear-gradient(90deg,#70231d,#bb4334 26%,#eb7a31 52%,#d6b361 73%,#4c9fc3);
+    }
+
+    .login-wrap{
+      width:100%;
+      max-width:440px;
+      margin:0 auto;
+    }
+
+    .login-kicker{
+      color:#b09a6b;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.23em;
+      text-transform:uppercase;
+    }
+
+    .login-wrap h2{
+      margin:8px 0 0;
+      color:#fff5e4;
+      font-family:Georgia,serif;
+      font-size:clamp(29px,4vw,39px);
+      line-height:1.05;
+    }
+
+    .login-wrap .subtitle{
+      margin:10px 0 28px;
+      color:#7f8985;
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .form-group{margin-bottom:16px}
+
+    label{
+      display:block;
+      margin-bottom:7px;
+      color:#aeb5b1;
+      font-size:10px;
+      font-weight:850;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .input-wrap{position:relative}
+
+    input{
+      width:100%;
+      min-height:50px;
+      border:1px solid #394244;
+      border-radius:9px;
+      outline:none;
+      background:#090d0f;
+      color:#f5eddd;
+      padding:12px 46px 12px 13px;
+      font:inherit;
+      font-size:16px;
+      transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+    }
+
+    input::placeholder{color:#59625f}
+
+    input:focus{
+      border-color:#577c88;
+      background:#0b1012;
+      box-shadow:0 0 0 3px rgba(76,159,195,.12);
+    }
+
+    .icon{
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#65706c;
+      font-size:15px;
+      pointer-events:none;
+    }
+
+    .password-toggle{
+      position:absolute;
+      right:7px;
+      top:50%;
+      transform:translateY(-50%);
+      width:38px;
+      height:38px;
+      border:0;
+      border-radius:7px;
+      background:transparent;
+      color:#78827e;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .password-toggle:hover{background:#151b1d;color:#d8c596}
+
+    .login-btn{
+      width:100%;
+      min-height:51px;
+      margin-top:8px;
+      border:1px solid #d35b43;
+      border-radius:9px;
+      background:linear-gradient(135deg,#8b2d26,#bb4334 55%,#ce513a);
+      color:#fff8ee;
+      font:inherit;
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      cursor:pointer;
+      box-shadow:0 10px 28px rgba(112,35,29,.28);
+      transition:transform .13s ease,filter .13s ease;
+    }
+
+    .login-btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+    .login-btn:active{transform:translateY(0)}
+
+    .status{
+      min-height:21px;
+      margin-top:12px;
+      font-size:12px;
+      font-weight:750;
+      line-height:1.5;
+    }
+
+    .status.info{color:#90a9b2}
+    .status.error{color:var(--danger)}
+    .status.success{color:var(--success)}
+
+    .divider{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:24px 0 18px;
+      color:#5e6764;
+      font-size:9px;
+      font-weight:850;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+    }
+
+    .divider::before,
+    .divider::after{
+      content:"";
+      height:1px;
+      flex:1;
+      background:#2b3234;
+    }
+
+    .notice{
+      padding:13px 14px;
+      border:1px solid #333b3d;
+      border-radius:9px;
+      background:#101517;
+      color:#78827f;
+      font-size:11px;
+      line-height:1.55;
+    }
+
+    .notice strong{color:#cdb987}
+
+    .access-footer{
+      margin-top:22px;
+      padding-top:18px;
+      border-top:1px solid #2b3234;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:#636c68;
+      font-size:10px;
+    }
+
+    .sigil{
+      color:#9c8350;
+      font-family:Georgia,serif;
+      letter-spacing:.08em;
+    }
+
+    @media(max-width:900px){
+      .shell{grid-template-columns:1fr;min-height:0}
+      .brand{border-right:0;border-bottom:1px solid #342f29}
+      .features{grid-template-columns:1fr 1fr 1fr}
+      .login-wrap{max-width:none}
+    }
+
+    @media(max-width:600px){
+      .page{width:min(100% - 18px,1180px);padding:10px 0}
+      .shell{border-radius:15px}
+      .brand,.login-side{padding:26px 20px}
+      .brand::after{inset:10px}
+      .brand h1{font-size:42px}
+      .features{grid-template-columns:1fr}
+      .feature{padding:11px 12px}
+      .brand-bottom{margin-top:20px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      *{scroll-behavior:auto!important;transition:none!important}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="shell" aria-label="Portal de acesso Monogatari no Shinobi">
+      <div class="brand">
+        <div class="brand-top">
+          <div class="seal" aria-hidden="true"><span>忍</span></div>
+        </div>
+
+        <div class="brand-main">
+          <div class="eyebrow">Portal Oficial • Registro Shinobi</div>
+          <h1>Monogatari <span>no Shinobi</span></h1>
+          <p>
+            Acesso reservado aos jogadores autorizados da campanha. Entre com suas credenciais
+            para consultar sua ficha, painel de sessão e registros individuais do personagem.
+          </p>
+
+          <div class="features" aria-label="Recursos do portal">
+            <div class="feature">
+              <b>Ficha Shinobi</b>
+              <span>Dados, missões, habilidades e atributos individuais.</span>
+            </div>
+            <div class="feature">
+              <b>Painel de Sessão</b>
+              <span>Vida, chakra, condições, inventário e anotações.</span>
+            </div>
+            <div class="feature">
+              <b>Acesso Privado</b>
+              <span>Cada jogador verá apenas os próprios registros.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="brand-bottom">
+          <span class="dot"></span>
+          <span>Arquivo de acesso restrito</span>
+        </div>
+      </div>
+
+      <div class="login-side">
+        <div class="login-wrap">
+          <div class="login-kicker">Identificação</div>
+          <h2>Acesso Shinobi</h2>
+          <p class="subtitle">
+            Informe o login cadastrado pelo mestre para acessar seus registros.
+          </p>
+
+          <form id="login-form" novalidate>
+            <div class="form-group">
+              <label for="login-email">Login / E-mail</label>
+              <div class="input-wrap">
+                <input id="login-email" name="email" type="email" autocomplete="username"
+                  placeholder="seuacesso@monogatari.com" maxlength="120" required>
+                <span class="icon" aria-hidden="true">✦</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="login-password">Senha</label>
+              <div class="input-wrap">
+                <input id="login-password" name="password" type="password"
+                  autocomplete="current-password" placeholder="Digite sua senha"
+                  minlength="6" maxlength="128" required>
+                <button id="toggle-password" class="password-toggle" type="button"
+                  aria-label="Mostrar senha" title="Mostrar ou ocultar senha">◉</button>
+              </div>
+            </div>
+
+            <button class="login-btn" type="submit">Entrar no Portal</button>
+            <div id="login-status" class="status info" aria-live="polite"></div>
+          </form>
+
+          <div class="divider">Acesso controlado</div>
+
+          <div class="access-footer">
+            <span>Monogatari no Shinobi</span>
+            <span class="sigil">火 • 忍 • 巻</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const form = document.getElementById('login-form');
+      const email = document.getElementById('login-email');
+      const password = document.getElementById('login-password');
+      const toggle = document.getElementById('toggle-password');
+      const status = document.getElementById('login-status');
+
+      toggle.addEventListener('click', () => {
+        const hidden = password.type === 'password';
+        password.type = hidden ? 'text' : 'password';
+        toggle.setAttribute('aria-label', hidden ? 'Ocultar senha' : 'Mostrar senha');
+        toggle.textContent = hidden ? '◎' : '◉';
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const user = email.value.trim();
+        const pass = password.value;
+
+        if (!user) {
+          status.className = 'status error';
+          status.textContent = 'Digite o login ou e-mail de acesso.';
+          email.focus();
+          return;
+        }
+
+        if (!email.checkValidity()) {
+          status.className = 'status error';
+          status.textContent = 'Digite um e-mail válido.';
+          email.focus();
+          return;
+        }
+
+        if (pass.length < 6) {
+          status.className = 'status error';
+          status.textContent = 'A senha precisa ter pelo menos 6 caracteres.';
+          password.focus();
+          return;
+        }
+
+        status.className = 'status info';
+        status.textContent = 'Interface pronta. A autenticação Firebase será conectada no próximo passo.';
+      });
+    })();
+  </script>
+</body>
+</html>
