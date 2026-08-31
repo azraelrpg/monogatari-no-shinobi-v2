@@ -1,5 +1,6 @@
 <div id="shinobi-panel-root" class="shinobi-app">
   <style>
+    html.auth-pending body{visibility:hidden}
     #shinobi-panel-root{--ink:#171a1f;--muted:#6f746f;--paper:#eee3c8;--paper2:#e4d3aa;--line:#b79c69;--dark:#171c1d;--dark2:#222a29;--chakra:#3d8db8;--chakra2:#7cc8df;--hp:#b94d43;--good:#4d7655;--warn:#b47a31;--bad:#9e3e38;min-height:100%;background:light-dark(#d8cfb8,#101414);color:light-dark(#1d211f,#f1ead9);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;border-radius:0;padding:0;overflow:hidden}
     #shinobi-panel-root *{box-sizing:border-box}
     #shinobi-panel-root button,#shinobi-panel-root input,#shinobi-panel-root select,#shinobi-panel-root textarea{font:inherit}
@@ -735,7 +736,37 @@
               Array.from(target.options).forEach((opt,i) => { if (i === control.selectedIndex) opt.setAttribute('selected','selected'); else opt.removeAttribute('selected'); });
             } else if (control.type !== 'file') target.setAttribute('value',control.value);
           });
-          const doc = '<!doctype html><html lang="pt-BR" style="margin:0;min-height:100%;background:#050708"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#050708"><title>Painel Shinobi</title></head><body style="margin:0;padding:0;min-height:100%;background:#050708;overflow-x:hidden">' + clone.outerHTML + '</body></html>';
+          const doc = '<!doctype html><html lang="pt-BR" style="margin:0;min-height:100%;background:#050708"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="theme-color" content="#050708"><title>Painel Shinobi</title></head><body style="margin:0;padding:0;min-height:100%;background:#050708;overflow-x:hidden">' + clone.outerHTML + '
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
+      authDomain: "monogatari-no-shinobi.firebaseapp.com",
+      projectId: "monogatari-no-shinobi",
+      storageBucket: "monogatari-no-shinobi.firebasestorage.app",
+      messagingSenderId: "304493645200",
+      appId: "1:304493645200:web:0777f1677b6fb662587715"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      document.documentElement.classList.remove("auth-pending");
+    });
+  </script>
+
+</body></html>';
           const blob = new Blob([doc],{type:'text/html;charset=utf-8'});
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
