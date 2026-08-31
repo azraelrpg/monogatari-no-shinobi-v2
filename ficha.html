@@ -338,7 +338,6 @@
     if (!app || app.dataset.ready === '1') return;
     app.dataset.ready = '1';
 
-    const STORAGE_KEY = 'kiroku-shinobi-sheet-v1:' + (location.pathname || 'default');
     const status = document.getElementById('status');
     const traitsList = document.getElementById('traits-list');
     const abilitiesList = document.getElementById('abilities-list');
@@ -430,31 +429,43 @@
     }
 
     function saveData(manual=false){
-      try{
-        localStorage.setItem(STORAGE_KEY,JSON.stringify(collectData()));
-        status.textContent = manual ? 'Ficha salva com sucesso.' : 'Alterações salvas automaticamente.';
-      }catch(err){
-        status.textContent = 'Não foi possível salvar no navegador. Use “Baixar cópia” para preservar a ficha.';
+      const data = collectData();
+
+      if (typeof window.__shinobiCloudSave !== 'function'){
+        status.textContent = 'Conectando ao salvamento online...';
+        return;
       }
+
+      status.textContent = manual ? 'Salvando ficha online...' : 'Salvando alterações...';
+
+      window.__shinobiCloudSave(data)
+        .then(() => {
+          status.textContent = manual
+            ? 'Ficha salva online com sucesso.'
+            : 'Alterações salvas automaticamente.';
+        })
+        .catch((err) => {
+          console.error('Falha ao salvar ficha no Firestore:', err);
+          status.textContent = 'Não foi possível salvar online. Verifique sua conexão.';
+        });
     }
 
     function queueSave(){
       clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => saveData(false),250);
+      saveTimer = setTimeout(() => saveData(false),800);
     }
 
-    function restoreData(){
+    function applyData(data){
       try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const data = JSON.parse(raw);
         if (!data || typeof data !== 'object') return;
+
         if (data.fields){
           Object.entries(data.fields).forEach(([id,val]) => {
             const el = document.getElementById(id);
             if (el && typeof val !== 'undefined') el.value = val;
           });
         }
+
         if (data.attrs){
           qa('[data-attr]').forEach(row => {
             const d = data.attrs[row.dataset.attr];
@@ -465,19 +476,33 @@
             if (special) special.value = d.special ?? '';
           });
         }
+
         traits = Array.isArray(data.traits) ? data.traits.slice(0,30).map(String) : [];
         abilities = Array.isArray(data.abilities) ? data.abilities.slice(0,30).map(String) : [];
         portraitData = typeof data.portraitData === 'string' ? data.portraitData : '';
+
         if (portraitData){
           portrait.src = portraitData;
           portrait.style.display = 'block';
           portraitPlaceholder.style.display = 'none';
+        }else{
+          portrait.removeAttribute('src');
+          portrait.style.display = 'none';
+          portraitPlaceholder.style.display = 'block';
         }
-        status.textContent = 'Ficha restaurada do salvamento anterior.';
+
+        renderList(traitsList,traits,'traits');
+        renderList(abilitiesList,abilities,'abilities');
+        refreshAllAttributes();
+        updateSummary();
       }catch(err){
-        status.textContent = 'O salvamento anterior não pôde ser restaurado.';
+        console.error('Falha ao aplicar dados da ficha:', err);
+        status.textContent = 'Os dados online não puderam ser carregados.';
       }
     }
+
+    window.__shinobiSheetApplyData = applyData;
+    window.__shinobiSheetCollectData = collectData;
 
     function updateSummary(){
       const name = q('#name').value.trim();
@@ -511,12 +536,16 @@
       portrait.style.display = 'none';
       portraitPlaceholder.style.display = 'block';
       portraitInput.value = '';
-      localStorage.removeItem(STORAGE_KEY);
+      if (typeof window.__shinobiCloudDelete === 'function'){
+        window.__shinobiCloudDelete().catch(err => {
+          console.error('Falha ao remover ficha online:', err);
+        });
+      }
       renderList(traitsList,traits,'traits');
       renderList(abilitiesList,abilities,'abilities');
       refreshAllAttributes();
       updateSummary();
-      status.textContent = 'Ficha limpa e salvamento anterior removido.';
+      status.textContent = 'Ficha reiniciada e salvamento online removido.';
     }
 
     function compressImage(file){
@@ -616,7 +645,6 @@
       }catch(err){status.textContent='Não foi possível gerar a cópia neste navegador.';}
     });
 
-    restoreData();
     renderList(traitsList,traits,'traits');
     renderList(abilitiesList,abilities,'abilities');
     refreshAllAttributes();
@@ -624,12 +652,20 @@
   })();
   </script>
 
-  <script type="module">
+  <script type="module" id="firebase-auth-script">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import {
       getAuth,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      deleteDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
@@ -640,16 +676,57 @@
       appId: "1:304493645200:web:0777f1677b6fb662587715"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    const db = getFirestore(firebaseApp);
+    const status = document.getElementById("status");
 
-    onAuthStateChanged(auth, (user) => {
+    let currentUser = null;
+
+    window.__shinobiCloudSave = async (data) => {
+      if (!currentUser) throw new Error("Usuário não autenticado.");
+
+      await setDoc(
+        doc(db, "fichas", currentUser.uid),
+        {
+          ...data,
+          updatedAt: serverTimestamp()
+        }
+      );
+    };
+
+    window.__shinobiCloudDelete = async () => {
+      if (!currentUser) throw new Error("Usuário não autenticado.");
+      await deleteDoc(doc(db, "fichas", currentUser.uid));
+    };
+
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.replace("index.html");
         return;
       }
 
-      document.documentElement.classList.remove("auth-pending");
+      currentUser = user;
+
+      try {
+        status.textContent = "Carregando ficha online...";
+
+        const snapshot = await getDoc(doc(db, "fichas", user.uid));
+
+        if (snapshot.exists()) {
+          if (typeof window.__shinobiSheetApplyData === "function") {
+            window.__shinobiSheetApplyData(snapshot.data());
+          }
+          status.textContent = "Ficha online carregada.";
+        } else {
+          status.textContent = "Ficha pronta. Seu primeiro salvamento será criado automaticamente.";
+        }
+      } catch (error) {
+        console.error("Falha ao carregar ficha do Firestore:", error);
+        status.textContent = "Não foi possível carregar a ficha online. Verifique sua conexão.";
+      } finally {
+        document.documentElement.classList.remove("auth-pending");
+      }
     });
   </script>
 
