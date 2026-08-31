@@ -382,6 +382,12 @@
 
     .login-btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
     .login-btn:active{transform:translateY(0)}
+    .login-btn:disabled{
+      cursor:not-allowed;
+      opacity:.72;
+      transform:none;
+      filter:none;
+    }
 
     .status{
       min-height:21px;
@@ -512,12 +518,12 @@
           <div class="login-kicker">Identificação</div>
           <h2>Acesso Shinobi</h2>
           <p class="subtitle">
-            Informe o login cadastrado pelo mestre para acessar seus registros.
+            Informe o e-mail cadastrado pelo mestre para acessar seus registros.
           </p>
 
           <form id="login-form" novalidate>
             <div class="form-group">
-              <label for="login-email">Login / E-mail</label>
+              <label for="login-email">E-mail</label>
               <div class="input-wrap">
                 <input id="login-email" name="email" type="email" autocomplete="username"
                   placeholder="seuacesso@monogatari.com" maxlength="120" required>
@@ -551,52 +557,113 @@
     </section>
   </main>
 
-  <script>
-    (() => {
-      const form = document.getElementById('login-form');
-      const email = document.getElementById('login-email');
-      const password = document.getElementById('login-password');
-      const toggle = document.getElementById('toggle-password');
-      const status = document.getElementById('login-status');
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import {
+      getAuth,
+      setPersistence,
+      browserLocalPersistence,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-      toggle.addEventListener('click', () => {
-        const hidden = password.type === 'password';
-        password.type = hidden ? 'text' : 'password';
-        toggle.setAttribute('aria-label', hidden ? 'Ocultar senha' : 'Mostrar senha');
-        toggle.textContent = hidden ? '◎' : '◉';
-      });
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
+      authDomain: "monogatari-no-shinobi.firebaseapp.com",
+      projectId: "monogatari-no-shinobi",
+      storageBucket: "monogatari-no-shinobi.firebasestorage.app",
+      messagingSenderId: "304493645200",
+      appId: "1:304493645200:web:0777f1677b6fb662587715"
+    };
 
-      form.addEventListener('submit', (event) => {
-        event.preventDefault();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-        const user = email.value.trim();
-        const pass = password.value;
+    const form = document.getElementById('login-form');
+    const email = document.getElementById('login-email');
+    const password = document.getElementById('login-password');
+    const toggle = document.getElementById('toggle-password');
+    const status = document.getElementById('login-status');
+    const submitButton = form.querySelector('.login-btn');
 
-        if (!user) {
-          status.className = 'status error';
-          status.textContent = 'Digite o login ou e-mail de acesso.';
-          email.focus();
-          return;
-        }
+    const showStatus = (message, type = 'info') => {
+      status.className = `status ${type}`;
+      status.textContent = message;
+    };
 
-        if (!email.checkValidity()) {
-          status.className = 'status error';
-          status.textContent = 'Digite um e-mail válido.';
-          email.focus();
-          return;
-        }
+    toggle.addEventListener('click', () => {
+      const hidden = password.type === 'password';
+      password.type = hidden ? 'text' : 'password';
+      toggle.setAttribute('aria-label', hidden ? 'Ocultar senha' : 'Mostrar senha');
+      toggle.textContent = hidden ? '◎' : '◉';
+    });
 
-        if (pass.length < 6) {
-          status.className = 'status error';
-          status.textContent = 'A senha precisa ter pelo menos 6 caracteres.';
-          password.focus();
-          return;
-        }
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch (error) {
+      console.error("Não foi possível configurar a persistência da sessão:", error);
+    }
 
-        status.className = 'status info';
-        status.textContent = 'Interface pronta. A autenticação Firebase será conectada no próximo passo.';
-      });
-    })();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.replace('inicio.html');
+      }
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const userEmail = email.value.trim();
+      const pass = password.value;
+
+      if (!userEmail) {
+        showStatus('Digite o e-mail de acesso.', 'error');
+        email.focus();
+        return;
+      }
+
+      if (!email.checkValidity()) {
+        showStatus('Digite um e-mail válido.', 'error');
+        email.focus();
+        return;
+      }
+
+      if (pass.length < 6) {
+        showStatus('A senha precisa ter pelo menos 6 caracteres.', 'error');
+        password.focus();
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'VERIFICANDO...';
+      showStatus('Verificando credenciais...', 'info');
+
+      try {
+        await signInWithEmailAndPassword(auth, userEmail, pass);
+        showStatus('Acesso autorizado. Entrando no portal...', 'success');
+        window.location.replace('inicio.html');
+      } catch (error) {
+        console.error("Falha no login:", error);
+
+        const friendlyErrors = {
+          'auth/invalid-email': 'Digite um e-mail válido.',
+          'auth/invalid-credential': 'E-mail ou senha incorretos.',
+          'auth/user-not-found': 'E-mail ou senha incorretos.',
+          'auth/wrong-password': 'E-mail ou senha incorretos.',
+          'auth/user-disabled': 'Este acesso foi desativado pelo mestre.',
+          'auth/too-many-requests': 'Muitas tentativas de acesso. Tente novamente mais tarde.',
+          'auth/network-request-failed': 'Não foi possível conectar ao servidor. Verifique sua internet.'
+        };
+
+        showStatus(
+          friendlyErrors[error.code] || 'Não foi possível entrar no portal. Tente novamente.',
+          'error'
+        );
+
+        submitButton.disabled = false;
+        submitButton.textContent = 'ENTRAR NO PORTAL';
+      }
+    });
   </script>
 </body>
 </html>
