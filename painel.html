@@ -55,6 +55,9 @@
     #shinobi-panel-root .lower-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.75fr);gap:18px}
     #shinobi-panel-root .condition-box{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
     #shinobi-panel-root .condition-badge{margin-top:12px;display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid light-dark(#c8b68d,#414c49);background:light-dark(#eee6d3,#151b1a)}
+    #shinobi-panel-root .combat-turns-field{grid-column:1/-1}
+    #shinobi-panel-root .combat-turns-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:end}
+    #shinobi-panel-root .combat-turns-separator{padding:0 2px 10px;color:light-dark(#776b54,#9da7a3);font-weight:900;text-align:center}
     #shinobi-panel-root .condition-dot{width:12px;height:12px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(77,118,85,.13);flex:0 0 auto}
     #shinobi-panel-root .condition-badge strong{font-size:13px}
     #shinobi-panel-root .condition-badge small{display:block;color:light-dark(#766d5a,#a2aba8);margin-top:1px}
@@ -148,9 +151,15 @@
     #shinobi-panel-root .inventory-item{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;padding:13px 14px;border:1px solid #383f40;border-radius:10px;background:linear-gradient(145deg,#171c1e,#101315);overflow:hidden}
     #shinobi-panel-root .inventory-item:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#d54a32,#e8752d)}
     #shinobi-panel-root .inventory-item h4{margin:0;color:#f5ecda;font-size:14px;line-height:1.25}
-    #shinobi-panel-root .inventory-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+    #shinobi-panel-root .inventory-name-edit{display:block;width:100%;min-height:0!important;margin:0!important;padding:1px 3px!important;border:1px solid transparent!important;border-radius:5px!important;background:transparent!important;color:#f5ecda!important;font-size:14px!important;font-weight:800!important;line-height:1.25!important;box-shadow:none!important}
+    #shinobi-panel-root .inventory-name-edit:hover{border-color:#3a4443!important;background:#101516!important}
+    #shinobi-panel-root .inventory-name-edit:focus{border-color:#42677a!important;background:#0d1315!important;outline:1px solid rgba(76,153,185,.45)!important;outline-offset:0!important}
+    #shinobi-panel-root .inventory-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;align-items:center}
     #shinobi-panel-root .inventory-tag{display:inline-flex;align-items:center;min-height:25px;padding:4px 8px;border-radius:999px;border:1px solid #4b4b42;background:#211f18;color:#d9bd7b;font-size:10px;font-weight:850;letter-spacing:.04em}
     #shinobi-panel-root .inventory-qty{background:#14222a;border-color:#31566a;color:#78bddb}
+    #shinobi-panel-root .inventory-qty-edit{width:70px!important;min-height:25px!important;height:25px!important;margin:0!important;padding:3px 7px!important;border-radius:999px!important;border:1px solid #31566a!important;background:#14222a!important;color:#78bddb!important;font-size:10px!important;font-weight:850!important;line-height:1!important;letter-spacing:.02em!important;text-align:center!important;box-shadow:none!important;-moz-appearance:textfield}
+    #shinobi-panel-root .inventory-qty-edit::-webkit-outer-spin-button,#shinobi-panel-root .inventory-qty-edit::-webkit-inner-spin-button{margin:0}
+    #shinobi-panel-root .inventory-qty-edit:focus{border-color:#4f8eaa!important;background:#10202a!important;outline:1px solid rgba(76,153,185,.45)!important;outline-offset:0!important}
     #shinobi-panel-root .inventory-remove{width:34px;height:34px;border-radius:8px;border:1px solid #4b3b38;background:#241514;color:#db7767;font-size:18px;line-height:1}
     #shinobi-panel-root .inventory-remove:hover{background:#321a18}
     #shinobi-panel-root .inventory-count{color:#8b9692;font-size:11px;font-weight:750}
@@ -235,6 +244,14 @@
               <div class="condition-box">
                 <div><label class="caption" for="sp-condition">Estado físico</label><select id="sp-condition"><option value="intacto">Intacto</option><option value="ferido">Ferido</option><option value="grave">Gravemente ferido</option><option value="exausto">Exausto</option><option value="incapacitado">Incapacitado</option><option value="inconsciente">Inconsciente</option></select></div>
                 <div><label class="caption" for="sp-stance">Situação</label><select id="sp-stance"><option>Estável</option><option>Em combate</option><option>Oculto</option><option>Imobilizado</option><option>Em fuga</option><option>Em repouso</option></select></div>
+                <div class="combat-turns-field">
+                  <label class="caption">Turnos em combate</label>
+                  <div class="combat-turns-inputs">
+                    <div><label class="caption" for="sp-combat-turns-current">Atual</label><input id="sp-combat-turns-current" type="number" min="0" max="999" step="1" inputmode="numeric" placeholder="Atual"></div>
+                    <span class="combat-turns-separator" aria-hidden="true">/</span>
+                    <div><label class="caption" for="sp-combat-turns-max">Máximo</label><input id="sp-combat-turns-max" type="number" min="1" max="999" step="1" inputmode="numeric" placeholder="Máx."></div>
+                  </div>
+                </div>
               </div>
               <div id="sp-condition-badge" class="condition-badge"><div id="sp-condition-dot" class="condition-dot"></div><div><strong id="sp-condition-label">Condição estável</strong><small id="sp-condition-desc">Sem ferimentos relevantes registrados.</small></div></div>
 
@@ -298,6 +315,8 @@
       const conditionDot = root.querySelector('#sp-condition-dot');
       const conditionLabel = root.querySelector('#sp-condition-label');
       const conditionDesc = root.querySelector('#sp-condition-desc');
+      const combatTurnsCurrent = root.querySelector('#sp-combat-turns-current');
+      const combatTurnsMax = root.querySelector('#sp-combat-turns-max');
       const effectForm = root.querySelector('#sp-effect-form');
       const effectInput = root.querySelector('#sp-effect-input');
       const effectsBox = root.querySelector('#sp-effects');
@@ -392,6 +411,8 @@
           chakraMax:clamp(parseInt(chakraMax.value,10),1,9999),
           condition:condition.value,
           stance:root.querySelector('#sp-stance').value,
+          combatTurnsCurrent:combatTurnsCurrent.value === '' ? null : clamp(parseInt(combatTurnsCurrent.value,10),0,999),
+          combatTurnsMax:combatTurnsMax.value === '' ? null : clamp(parseInt(combatTurnsMax.value,10),1,999),
           notes:notes.value,
           effects:effects.slice(0,12),
           inventory:inventory.slice(0,30).map(item => ({name:String(item.name).slice(0,42),type:String(item.type),qty:clamp(parseInt(item.qty,10),1,999)})),
@@ -452,6 +473,11 @@
           if (Array.from(stance.options).some(opt => opt.value === state.stance)) stance.value=state.stance;
 
           if (conditionData[state.condition]) condition.value=state.condition;
+
+          const savedCombatTurnsMax = parseInt(state.combatTurnsMax,10);
+          const savedCombatTurnsCurrent = parseInt(state.combatTurnsCurrent,10);
+          combatTurnsMax.value = Number.isFinite(savedCombatTurnsMax) ? String(clamp(savedCombatTurnsMax,1,999)) : '';
+          combatTurnsCurrent.value = Number.isFinite(savedCombatTurnsCurrent) ? String(clamp(savedCombatTurnsCurrent,0,999)) : '';
 
           hp.value=clamp(parseInt(state.hp,10),0,100);
           chakraMax.value=clamp(parseInt(state.chakraMax,10),1,9999);
@@ -599,19 +625,82 @@
           row.dataset.name = item.name;
           row.dataset.type = item.type;
           row.dataset.qty = String(item.qty);
+
           const info = document.createElement('div');
-          const title = document.createElement('h4');
-          title.textContent = item.name;
+
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.maxLength = 42;
+          nameInput.className = 'inventory-name-edit';
+          nameInput.value = item.name;
+          nameInput.setAttribute('aria-label','Nome do item');
+          nameInput.title = 'Clique para renomear o item';
+          let lastValidName = item.name;
+          nameInput.addEventListener('input',() => {
+            const nextName = nameInput.value.trim();
+            if (!nextName) return;
+            item.name = nextName;
+            lastValidName = nextName;
+            row.dataset.name = nextName;
+            remove.setAttribute('aria-label','Remover ' + nextName);
+            inventoryMsg.textContent = '';
+            scheduleAutoSave();
+          });
+          nameInput.addEventListener('blur',() => {
+            const nextName = nameInput.value.trim();
+            if (!nextName) {
+              nameInput.value = lastValidName;
+              inventoryMsg.textContent = 'O nome do item não pode ficar vazio.';
+              return;
+            }
+            item.name = nextName;
+            lastValidName = nextName;
+            nameInput.value = nextName;
+            row.dataset.name = nextName;
+            remove.setAttribute('aria-label','Remover ' + nextName);
+            inventoryMsg.textContent = '';
+            scheduleAutoSave();
+          });
+
           const meta = document.createElement('div');
           meta.className = 'inventory-meta';
           const type = document.createElement('span');
           type.className = 'inventory-tag';
           type.textContent = item.type;
-          const qty = document.createElement('span');
-          qty.className = 'inventory-tag inventory-qty';
-          qty.textContent = 'Qtd. ' + item.qty;
-          meta.append(type,qty);
-          info.append(title,meta);
+
+          const qtyInput = document.createElement('input');
+          qtyInput.type = 'number';
+          qtyInput.min = '1';
+          qtyInput.max = '999';
+          qtyInput.step = '1';
+          qtyInput.inputMode = 'numeric';
+          qtyInput.className = 'inventory-qty-edit';
+          qtyInput.value = String(item.qty);
+          qtyInput.setAttribute('aria-label','Quantidade de ' + item.name);
+          qtyInput.title = 'Altere a quantidade diretamente';
+          qtyInput.addEventListener('input',() => {
+            if (qtyInput.value === '') return;
+            const parsed = parseInt(qtyInput.value,10);
+            if (!Number.isFinite(parsed)) return;
+            item.qty = clamp(parsed,1,999);
+            row.dataset.qty = String(item.qty);
+            inventoryMsg.textContent = '';
+            scheduleAutoSave();
+          });
+          const normalizeQty = () => {
+            const parsed = parseInt(qtyInput.value,10);
+            item.qty = clamp(Number.isFinite(parsed) ? parsed : item.qty,1,999);
+            qtyInput.value = String(item.qty);
+            row.dataset.qty = String(item.qty);
+            inventoryMsg.textContent = '';
+            scheduleAutoSave();
+          };
+          qtyInput.addEventListener('change',normalizeQty);
+          qtyInput.addEventListener('blur',normalizeQty);
+
+          meta.append(type,qtyInput);
+          info.append(nameInput,meta);
+
           const remove = document.createElement('button');
           remove.type = 'button';
           remove.className = 'inventory-remove';
@@ -762,6 +851,8 @@
         root.querySelector('#sp-rank').selectedIndex=0;
         root.querySelector('#sp-stance').selectedIndex=0;
         condition.value='intacto';
+        combatTurnsCurrent.value='';
+        combatTurnsMax.value='';
         hp.value='100';
         chakraCurrent.value='100';
         chakraMax.value='100';
