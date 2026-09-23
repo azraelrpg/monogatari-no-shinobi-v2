@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="pt-BR" class="auth-pending">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Monogatari no Shinobi — Técnicas</title>
+  <style>
+    :root{
+      --bg:#07090b;--bg2:#0b0f11;--panel:#121719;--panel2:#0c1012;--panel3:#181e20;
+      --border:#303739;--border2:#3b4345;--text:#f4ecdc;--muted:#89938f;
+      --red:#bb4334;--red2:#70231d;--orange:#e97830;--gold:#d7b35e;--gold2:#8d713d;
+      --chakra:#4a9cc0;--green:#5c8567;--shadow:0 30px 90px rgba(0,0,0,.48);
+    }
+    *{box-sizing:border-box}
+    html.auth-pending body{visibility:hidden}
+    html,body{margin:0;min-height:100%;background:#07090b;color:var(--text)}
+    body{
+      min-height:100vh;font-family:Inter,"Trebuchet MS",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 11% 8%,rgba(187,67,52,.18),transparent 29%),
+        radial-gradient(circle at 88% 15%,rgba(233,120,48,.07),transparent 25%),
+        radial-gradient(circle at 80% 85%,rgba(74,156,192,.06),transparent 27%),
+        linear-gradient(135deg,#07090b 0%,#0c1012 48%,#080a0c 100%);
+      overflow-x:hidden;
+    }
+    body::before{content:"";position:fixed;width:620px;height:620px;right:-290px;top:65px;border:1px solid rgba(215,179,94,.14);border-radius:50%;box-shadow:inset 0 0 0 30px rgba(215,179,94,.009),inset 0 0 0 68px rgba(215,179,94,.006),inset 0 0 0 112px rgba(215,179,94,.004);pointer-events:none;opacity:.28}
+    body::after{content:"術";position:fixed;left:-45px;bottom:-145px;font-family:Georgia,serif;font-size:390px;font-weight:900;color:rgba(215,179,94,.025);transform:rotate(-8deg);pointer-events:none}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .page{position:relative;z-index:1;width:min(1240px,calc(100% - 28px));min-height:100vh;margin:0 auto;padding:28px 0 48px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:16px 18px;border:1px solid #2d3537;border-radius:14px;background:rgba(12,16,18,.9);box-shadow:0 14px 38px rgba(0,0,0,.24);backdrop-filter:blur(8px)}
+    .brand-mini{display:flex;align-items:center;gap:13px;min-width:0}
+    .mini-seal{width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;border:1px solid #8f7440;border-radius:11px;background:linear-gradient(145deg,#291f18,#111516);transform:rotate(45deg)}
+    .mini-seal span{transform:rotate(-45deg);font-family:Georgia,serif;color:#e0c57b;font-size:18px}
+    .brand-text b{display:block;color:#f6edda;font-family:Georgia,serif;font-size:17px;line-height:1.05}
+    .brand-text small{display:block;margin-top:4px;color:#777f7c;font-size:9px;font-weight:850;letter-spacing:.15em;text-transform:uppercase}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .ghost-btn,.primary-btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 13px;border-radius:8px;text-decoration:none;font-weight:850;font-size:11px;letter-spacing:.04em;transition:filter .15s ease,transform .15s ease}
+    .ghost-btn{border:1px solid #414a4b;background:#181f21;color:#cfc6b4}
+    .primary-btn{border:1px solid #c45b48;background:linear-gradient(135deg,#8e2f29,#b44539);color:#fff8ee;box-shadow:0 7px 20px rgba(117,36,31,.22)}
+    .ghost-btn:hover,.primary-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+    .hero{position:relative;margin-top:22px;overflow:hidden;min-height:270px;display:flex;align-items:flex-end;padding:clamp(28px,5vw,54px);border:1px solid #393530;border-radius:18px;background:radial-gradient(circle at 8% 10%,rgba(187,67,52,.27),transparent 31%),radial-gradient(circle at 88% 70%,rgba(74,156,192,.075),transparent 25%),linear-gradient(145deg,#111517,#191e20 58%,#0d1113);box-shadow:var(--shadow)}
+    .hero::before{content:"術";position:absolute;right:22px;top:-112px;color:rgba(215,179,94,.045);font-family:Georgia,serif;font-size:340px;font-weight:900;transform:rotate(-4deg)}
+    .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,#70231d,#bb4334 24%,#e97830 48%,#d7b35e 70%,#4a9cc0)}
+    .hero-copy{position:relative;z-index:1;max-width:790px}
+    .eyebrow{color:#c1a76f;font-size:10px;font-weight:900;letter-spacing:.26em;text-transform:uppercase}
+    .hero h1{margin:8px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,6vw,66px);line-height:.97;letter-spacing:-.045em;color:#fff6e6}
+    .hero h1 span{color:#c74a38}
+    .hero p{max-width:720px;margin:18px 0 0;color:#9da7a3;font-size:14px;line-height:1.7}
+    .preview-note{margin-top:13px;display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #50452f;border-radius:999px;background:#17140f;color:#cbb782;font-size:10px;font-weight:800;letter-spacing:.05em}
+    .toolbar{display:grid;grid-template-columns:minmax(220px,1.6fr) repeat(2,minmax(150px,.55fr)) auto;gap:10px;align-items:end;margin:26px 0 16px;padding:15px;border:1px solid #30383a;border-radius:14px;background:rgba(15,19,21,.9);box-shadow:0 16px 40px rgba(0,0,0,.22)}
+    label.caption{display:block;margin-bottom:6px;color:#8d9793;font-size:9px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+    input[type="text"],input[type="number"],select,textarea{width:100%;min-height:43px;border:1px solid #3d4546;border-radius:8px;background:#0a0e10;color:#f4eddd;padding:10px 11px;outline:none}
+    input::placeholder,textarea::placeholder{color:#636d69}
+    input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid rgba(74,156,192,.72);outline-offset:2px}
+    .count-pill{min-height:43px;display:flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid #3a4142;border-radius:8px;background:#171d1f;color:#cdbd98;font-size:11px;font-weight:850;white-space:nowrap}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:21px 2px 12px}
+    .section-head h2{margin:0;font-family:Georgia,serif;font-size:22px;color:#f1e7d3}
+    .section-head span{color:#747e7a;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+    .tech-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .tech-card{position:relative;overflow:hidden;border:1px solid #353d3f;border-radius:14px;background:linear-gradient(160deg,#151a1c,#0d1113);box-shadow:0 17px 46px rgba(0,0,0,.34)}
+    .tech-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(#d54a32,#e8752d 58%,#d7b35e)}
+    .tech-summary{display:block;min-height:188px}
+    .tech-main{padding:17px 17px 14px;min-width:0}
+    .tech-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .tech-title{margin:0;color:#fff3dd;font-family:Georgia,serif;font-size:22px;line-height:1.12;overflow-wrap:anywhere}
+    .rank-badge{flex:0 0 auto;min-width:39px;height:34px;display:grid;place-items:center;border:1px solid #8f6e35;border-radius:8px;background:#211b10;color:#e3c477;font-size:11px;font-weight:950;letter-spacing:.07em}
+    .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+    .chip{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border-radius:999px;border:1px solid #48483e;background:#201e17;color:#d8bc78;font-size:10px;font-weight:850}
+    .chip.chakra{background:#12232b;border-color:#31576a;color:#75bad8}
+    .chip.range{background:#18201a;border-color:#405544;color:#9bc29d}
+    .chip.type{background:#241716;border-color:#57342f;color:#d98778}
+    .chip.nature{background:#18191f;border-color:#3e414f;color:#aeb2d0}
+    .tech-description{margin:12px 0 0;color:#9aa4a0;font-size:12px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .tech-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid #2e3536}
+    .details-btn{border:0;background:transparent;color:#d2bd8c;padding:5px 0;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+    .mini-actions{display:flex;gap:7px}
+    .icon-btn{min-height:32px;padding:6px 9px;border:1px solid #404849;border-radius:7px;background:#1a2022;color:#bfc6c2;font-size:10px;font-weight:800}
+    .icon-btn.danger{border-color:#523633;background:#211514;color:#c87569}
+    .tech-details{display:none;padding:0 18px 18px;border-top:1px solid #2f3637;background:rgba(7,10,11,.38)}
+    .tech-card.expanded .tech-details{display:block}
+    .tech-card.expanded .tech-description{-webkit-line-clamp:unset}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:15px}
+    .detail-box{padding:12px;border:1px solid #343c3d;border-radius:9px;background:#111617;min-width:0}
+    .detail-box.full{grid-column:1/-1}
+    .detail-box b{display:block;margin-bottom:5px;color:#8e9894;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
+    .detail-box p{margin:0;color:#d7cfbd;font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+    .empty{grid-column:1/-1;padding:48px 22px;border:1px dashed #41494a;border-radius:14px;text-align:center;background:#0c1012;color:#77817e}
+    .empty .mark{font-family:Georgia,serif;font-size:54px;color:#8e7441}
+    .empty h3{margin:10px 0 4px;color:#dcd2bd;font-family:Georgia,serif}
+    .empty p{margin:0 auto;max-width:520px;font-size:12px;line-height:1.6}
+    .modal{position:fixed;z-index:30;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,4,5,.82);backdrop-filter:blur(7px)}
+    .modal.open{display:flex}
+    .modal-shell{width:min(880px,100%);max-height:min(900px,92vh);overflow:auto;border:1px solid #3a4243;border-radius:16px;background:linear-gradient(160deg,#151a1c,#090d0f);box-shadow:0 35px 110px rgba(0,0,0,.65)}
+    .modal-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:16px 18px;border-bottom:1px solid #343b3c;background:rgba(15,19,21,.97);backdrop-filter:blur(8px)}
+    .modal-head h3{margin:0;color:#f3e8d3;font-family:Georgia,serif;font-size:22px}
+    .close-btn{width:38px;height:38px;border:1px solid #464e4f;border-radius:8px;background:#1b2224;color:#d3c9b6;font-size:20px}
+    .form-body{padding:18px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .field.full{grid-column:1/-1}
+    textarea{min-height:135px;resize:vertical;line-height:1.55}
+    .custom-field{display:none;margin-top:8px}
+    .custom-field.show{display:block}
+    .form-footer{display:flex;justify-content:flex-end;gap:9px;margin-top:18px;padding-top:16px;border-top:1px solid #303738}
+    .status{min-height:18px;margin-top:8px;color:#a8baaf;font-size:11px;font-weight:700}
+    .bottom-note{margin-top:22px;text-align:center;color:#555f5b;font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+    @media(max-width:900px){.toolbar{grid-template-columns:1fr 1fr}.toolbar .search-field{grid-column:1/-1}.count-pill{grid-column:2}.tech-grid{grid-template-columns:1fr}}
+    @media(max-width:680px){.page{width:min(100% - 16px,1240px);padding-top:8px}.topbar{align-items:flex-start;flex-direction:column}.top-actions{width:100%;justify-content:stretch}.top-actions>*{flex:1}.hero{margin-top:12px;padding:28px 20px;min-height:250px}.hero h1{font-size:42px}.toolbar{grid-template-columns:1fr}.toolbar .search-field,.count-pill{grid-column:auto}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.detail-grid{grid-template-columns:1fr}.detail-box.full{grid-column:auto}}
+    @media(max-width:430px){.tech-main{padding:15px 14px 13px}.tech-title{font-size:20px}.modal{padding:8px}.form-body{padding:14px}.hero::before{right:-60px}.chips{gap:6px}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand-mini">
+        <div class="mini-seal" aria-hidden="true"><span>忍</span></div>
+        <div class="brand-text"><b>Monogatari no Shinobi</b><small>Arquivo de Técnicas</small></div>
+      </div>
+      <div class="top-actions">
+        <button id="back-btn" class="ghost-btn" type="button">← Voltar ao Portal</button>
+        <button id="new-tech-top" class="primary-btn" type="button">＋ Nova Técnica</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">Registro Individual • Jutsu e Artes Shinobi</div>
+        <h1>Arquivo de <span>Técnicas</span></h1>
+        <p>Consulte, organize e atualize as técnicas conhecidas pelo personagem. Os cards priorizam as informações usadas durante a sessão e podem ser expandidos quando você precisar ler todos os detalhes.</p>
+        <div id="sync-note" class="preview-note">◈ Validando acesso e carregando suas técnicas...</div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="Filtros de técnicas">
+      <div class="search-field"><label class="caption" for="search">Buscar técnica</label><input id="search" type="text" placeholder="Nome, descrição, classificação..."></div>
+      <div><label class="caption" for="filter-type">Classificação</label><select id="filter-type"><option value="">Todas</option></select></div>
+      <div><label class="caption" for="filter-rank">Rank</label><select id="filter-rank"><option value="">Todos</option><option>D</option><option>C</option><option>B</option><option>A</option><option>S</option><option>—</option></select></div>
+      <div id="tech-count" class="count-pill">0 técnicas</div>
+    </section>
+
+    <div class="section-head"><h2>Técnicas registradas</h2><span>Clique em “Ver detalhes” para expandir</span></div>
+    <section id="tech-grid" class="tech-grid" aria-live="polite"></section>
+    <div class="bottom-note">Monogatari no Shinobi • Arquivo individual de técnicas • Acesso restrito</div>
+  </main>
+
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-shell">
+      <div class="modal-head"><h3 id="modal-title">Nova Técnica</h3><button id="close-modal" class="close-btn" type="button" aria-label="Fechar">×</button></div>
+      <form id="tech-form" class="form-body">
+        <input id="edit-id" type="hidden" value="">
+        <div class="form-grid">
+          <div class="field full"><label class="caption" for="name">Nome da técnica</label><input id="name" type="text" maxlength="90" placeholder="Ex.: Katon: Gōkakyū no Jutsu" required></div>
+          <div class="field"><label class="caption" for="rank">Rank</label><select id="rank"><option>D</option><option selected>C</option><option>B</option><option>A</option><option>S</option><option>—</option></select></div>
+          <div class="field"><label class="caption" for="chakra">Custo de Chakra</label><input id="chakra" type="number" min="0" max="99999" placeholder="Ex.: 15"></div>
+          <div class="field"><label class="caption" for="range">Alcance</label><input id="range" type="text" maxlength="45" placeholder="Ex.: Médio • 15 metros"></div>
+          <div class="field"><label class="caption" for="type">Classificação</label><select id="type"></select><div id="custom-type-wrap" class="custom-field"><input id="custom-type" type="text" maxlength="45" placeholder="Digite a classificação personalizada"></div></div>
+          <div class="field"><label class="caption" for="nature">Natureza / Afinidade</label><select id="nature"><option>Nenhuma</option><option>Katon</option><option>Suiton</option><option>Fūton</option><option>Doton</option><option>Raiton</option><option>Yin</option><option>Yang</option><option>Yin–Yang</option><option value="Outro">Outra</option></select><div id="custom-nature-wrap" class="custom-field"><input id="custom-nature" type="text" maxlength="45" placeholder="Digite a natureza personalizada"></div></div>
+          <div class="field full"><label class="caption" for="description">Descrição</label><textarea id="description" maxlength="1600" placeholder="Explique o funcionamento da técnica, efeitos, duração, limitações, dano ou outras informações importantes."></textarea></div>
+          <div class="field full"><label class="caption" for="requirements">Requisitos / Condições</label><textarea id="requirements" maxlength="900" placeholder="Ex.: Ninjutsu 2★, afinidade Katon, necessidade de selos manuais, arma específica..."></textarea></div>
+        </div>
+        <div id="form-status" class="status" aria-live="polite"></div>
+        <div class="form-footer"><button id="cancel-modal" class="ghost-btn" type="button">Cancelar</button><button class="primary-btn" type="submit">✓ Salvar técnica</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, collection, getDocs, setDoc, updateDoc,
+      deleteDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0Bzxdyhl5M1wUkMu1UclxlF3lciHgaDk",
+      authDomain: "monogatari-no-shinobi.firebaseapp.com",
+      projectId: "monogatari-no-shinobi",
+      messagingSenderId: "304493645200",
+      appId: "1:304493645200:web:0777f1677b6fb662587715"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const categories = ['Ninjutsu','Taijutsu','Genjutsu','Kenjutsu','Shurikenjutsu','Bukijutsu','Fūinjutsu','Iryō Ninjutsu','Hiden','Kuchiyose','Senjutsu','Dōjutsu','Outro'];
+    const $ = (s) => document.querySelector(s);
+    const grid = $('#tech-grid');
+    const search = $('#search');
+    const filterType = $('#filter-type');
+    const filterRank = $('#filter-rank');
+    const count = $('#tech-count');
+    const modal = $('#modal');
+    const form = $('#tech-form');
+    const modalTitle = $('#modal-title');
+    const typeSelect = $('#type');
+    const customTypeWrap = $('#custom-type-wrap');
+    const customType = $('#custom-type');
+    const natureSelect = $('#nature');
+    const customNatureWrap = $('#custom-nature-wrap');
+    const customNature = $('#custom-nature');
+    const formStatus = $('#form-status');
+    const syncNote = $('#sync-note');
+    const backButton = $('#back-btn');
+    const newTechButton = $('#new-tech-top');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    let currentUser = null;
+    let targetUserId = null;
+    let viewingAnotherPlayer = false;
+    let techniques = [];
+    let busy = false;
+
+    categories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat === 'Outro' ? 'Outro / Personalizado' : cat;
+      typeSelect.appendChild(opt);
+    });
+
+    function esc(text){
+      return String(text ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    function setSync(message, error=false){
+      syncNote.textContent = (error ? '⚠ ' : '◈ ') + message;
+      syncNote.style.color = error ? '#d89183' : '';
+    }
+
+    async function resolveTargetUser(user){
+      const requestedUid = (new URLSearchParams(window.location.search).get('uid') || '').trim();
+      if (!requestedUid || requestedUid === user.uid) return user.uid;
+
+      const adminSnapshot = await getDoc(doc(db,'admins',user.uid));
+      if (!adminSnapshot.exists() || adminSnapshot.data().admin !== true){
+        window.location.replace('inicio.html');
+        throw new Error('Acesso administrativo necessário.');
+      }
+
+      viewingAnotherPlayer = true;
+      return requestedUid;
+    }
+
+    async function loadTechniques(){
+      if (!targetUserId) return;
+      setSync(viewingAnotherPlayer ? 'Carregando técnicas do jogador...' : 'Carregando suas técnicas...');
+      grid.innerHTML = '<div class="empty"><div class="mark">術</div><h3>Carregando técnicas</h3><p>Aguarde enquanto os registros são sincronizados.</p></div>';
+
+      try {
+        const snapshot = await getDocs(collection(db,'tecnicas',targetUserId,'itens'));
+        const rows = snapshot.docs.map(d => ({id:d.id,...d.data()}));
+        rows.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR'));
+        techniques = rows;
+        render();
+        setSync(viewingAnotherPlayer ? 'Técnicas do jogador carregadas. Alterações serão salvas neste registro.' : 'Técnicas sincronizadas com sua conta.');
+      } catch (error) {
+        console.error('Falha ao carregar técnicas:',error);
+        techniques=[];
+        render();
+        setSync('Não foi possível carregar as técnicas. Verifique as regras do Firestore e sua conexão.',true);
+      }
+    }
+
+    function updateFilterOptions(){
+      const current = filterType.value;
+      const values = [...new Set(techniques.map(t=>t.type||'Outro').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+      filterType.innerHTML='<option value="">Todas</option>' + values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+      if(values.includes(current)) filterType.value=current;
+    }
+
+    function render(){
+      updateFilterOptions();
+      const q = search.value.trim().toLowerCase();
+      const ft = filterType.value;
+      const fr = filterRank.value;
+      const filtered = techniques.filter(t=>{
+        const hay=[t.name,t.type,t.nature,t.description,t.requirements,t.range].join(' ').toLowerCase();
+        return (!q || hay.includes(q)) && (!ft || t.type===ft) && (!fr || t.rank===fr);
+      });
+
+      count.textContent = techniques.length + (techniques.length===1?' técnica':' técnicas');
+      grid.innerHTML='';
+
+      if(!filtered.length){
+        grid.innerHTML='<div class="empty"><div class="mark">術</div><h3>Nenhuma técnica encontrada</h3><p>Adicione uma técnica nova ou ajuste os filtros para visualizar outros registros.</p></div>';
+        return;
+      }
+
+      filtered.forEach(t=>{
+        const card=document.createElement('article');
+        card.className='tech-card';
+        const nature = t.nature && t.nature!=='Nenhuma' ? `<span class="chip nature">${esc(t.nature)}</span>` : '';
+        card.innerHTML=`
+          <div class="tech-summary">
+            <div class="tech-main">
+              <div class="tech-title-row"><h3 class="tech-title">${esc(t.name)}</h3><span class="rank-badge">${esc(t.rank || '—')}</span></div>
+              <div class="chips">
+                <span class="chip chakra">◆ ${Number(t.chakra||0)} PC</span>
+                <span class="chip range">↔ ${esc(t.range || 'Não definido')}</span>
+                <span class="chip type">${esc(t.type || 'Outro')}</span>${nature}
+              </div>
+              <p class="tech-description">${esc(t.description || 'Nenhuma descrição informada.')}</p>
+              <div class="tech-actions">
+                <button class="details-btn" type="button">Ver detalhes ▾</button>
+                <div class="mini-actions"><button class="icon-btn edit" type="button">Editar</button><button class="icon-btn danger delete" type="button">Excluir</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="tech-details">
+            <div class="detail-grid">
+              <div class="detail-box full"><b>Descrição completa</b><p>${esc(t.description || 'Nenhuma descrição informada.')}</p></div>
+              <div class="detail-box"><b>Classificação</b><p>${esc(t.type || 'Outro')}</p></div>
+              <div class="detail-box"><b>Natureza / Afinidade</b><p>${esc(t.nature || 'Nenhuma')}</p></div>
+              <div class="detail-box"><b>Alcance</b><p>${esc(t.range || 'Não definido')}</p></div>
+              <div class="detail-box"><b>Custo de Chakra</b><p>${Number(t.chakra||0)} PC</p></div>
+              <div class="detail-box full"><b>Requisitos / Condições</b><p>${esc(t.requirements || 'Nenhum requisito específico informado.')}</p></div>
+            </div>
+          </div>`;
+
+        card.querySelector('.details-btn').addEventListener('click',e=>{
+          card.classList.toggle('expanded');
+          e.currentTarget.textContent=card.classList.contains('expanded')?'Ocultar detalhes ▴':'Ver detalhes ▾';
+        });
+        card.querySelector('.edit').addEventListener('click',()=>openEdit(t.id));
+        card.querySelector('.delete').addEventListener('click',()=>deleteTechnique(t));
+        grid.appendChild(card);
+      });
+    }
+
+    function resetForm(){
+      form.reset();
+      $('#edit-id').value='';
+      $('#rank').value='C';
+      typeSelect.value='Ninjutsu';
+      natureSelect.value='Nenhuma';
+      customTypeWrap.classList.remove('show');
+      customNatureWrap.classList.remove('show');
+      customType.value='';
+      customNature.value='';
+      formStatus.textContent='';
+      modalTitle.textContent='Nova Técnica';
+    }
+
+    function openNew(){
+      if(busy) return;
+      resetForm();
+      modal.classList.add('open');
+      setTimeout(()=>$('#name').focus(),30);
+    }
+
+    function openEdit(id){
+      if(busy) return;
+      const t=techniques.find(x=>x.id===id);
+      if(!t) return;
+      resetForm();
+      $('#edit-id').value=t.id;
+      modalTitle.textContent='Editar Técnica';
+      $('#name').value=t.name||'';
+      $('#rank').value=t.rank||'C';
+      $('#chakra').value=t.chakra??'';
+      $('#range').value=t.range||'';
+      $('#description').value=t.description||'';
+      $('#requirements').value=t.requirements||'';
+
+      if(categories.includes(t.type) && t.type!=='Outro'){
+        typeSelect.value=t.type;
+      } else {
+        typeSelect.value='Outro';
+        customTypeWrap.classList.add('show');
+        customType.value=t.type||'';
+      }
+
+      const knownNature=[...natureSelect.options].map(o=>o.value).filter(v=>v!=='Outro');
+      if(knownNature.includes(t.nature||'Nenhuma')){
+        natureSelect.value=t.nature||'Nenhuma';
+      } else {
+        natureSelect.value='Outro';
+        customNatureWrap.classList.add('show');
+        customNature.value=t.nature||'';
+      }
+
+      modal.classList.add('open');
+      setTimeout(()=>$('#name').focus(),30);
+    }
+
+    function closeModal(force=false){
+      if(busy && !force) return;
+      modal.classList.remove('open');
+    }
+
+    typeSelect.addEventListener('change',()=>customTypeWrap.classList.toggle('show',typeSelect.value==='Outro'));
+    natureSelect.addEventListener('change',()=>customNatureWrap.classList.toggle('show',natureSelect.value==='Outro'));
+
+    async function saveTechnique(event){
+      event.preventDefault();
+      if(busy || !currentUser || !targetUserId) return;
+
+      const name=$('#name').value.trim();
+      let type=typeSelect.value==='Outro'?customType.value.trim():typeSelect.value;
+      let nature=natureSelect.value==='Outro'?customNature.value.trim():natureSelect.value;
+      if(!name){formStatus.textContent='Informe o nome da técnica.';return;}
+      if(!type){formStatus.textContent='Informe a classificação personalizada.';return;}
+      if(!nature)nature='Nenhuma';
+
+      const editId=$('#edit-id').value.trim();
+      const collectionRef=collection(db,'tecnicas',targetUserId,'itens');
+      const techRef=editId ? doc(db,'tecnicas',targetUserId,'itens',editId) : doc(collectionRef);
+
+      busy=true;
+      submitButton.disabled=true;
+      submitButton.textContent='Salvando...';
+      formStatus.textContent='Salvando técnica...';
+
+      try{
+        const payload={
+          name,
+          rank:$('#rank').value,
+          chakra:Math.max(0,parseInt($('#chakra').value||'0',10)||0),
+          range:$('#range').value.trim().slice(0,45),
+          type:type.slice(0,45),
+          nature:nature.slice(0,45),
+          description:$('#description').value.trim().slice(0,1600),
+          requirements:$('#requirements').value.trim().slice(0,900),
+          updatedAt:serverTimestamp()
+        };
+
+        if(editId){
+          await updateDoc(techRef,payload);
+        } else {
+          await setDoc(techRef,{...payload,createdAt:serverTimestamp()});
+        }
+
+
+        closeModal(true);
+        await loadTechniques();
+        setSync(viewingAnotherPlayer ? 'Técnica salva no arquivo do jogador.' : 'Técnica salva com sucesso.');
+      }catch(error){
+        console.error('Falha ao salvar técnica:',error);
+        formStatus.textContent='Não foi possível salvar a técnica. Verifique sua conexão e as regras do Firestore.';
+      }finally{
+        busy=false;
+        submitButton.disabled=false;
+        submitButton.textContent='✓ Salvar técnica';
+      }
+    }
+
+    async function deleteTechnique(t){
+      if(busy || !targetUserId) return;
+      if(!confirm(`Excluir “${t.name}”? Essa ação remove a técnica do arquivo.`)) return;
+      busy=true;
+      setSync('Excluindo técnica...');
+      try{
+        await deleteDoc(doc(db,'tecnicas',targetUserId,'itens',t.id));
+        techniques=techniques.filter(x=>x.id!==t.id);
+        render();
+        setSync('Técnica excluída.');
+      }catch(error){
+        console.error('Falha ao excluir técnica:',error);
+        setSync('Não foi possível excluir a técnica.',true);
+      }finally{
+        busy=false;
+      }
+    }
+
+    form.addEventListener('submit',saveTechnique);
+    newTechButton.addEventListener('click',openNew);
+    $('#close-modal').addEventListener('click',closeModal);
+    $('#cancel-modal').addEventListener('click',closeModal);
+    modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
+    search.addEventListener('input',render);
+    filterType.addEventListener('change',render);
+    filterRank.addEventListener('change',render);
+
+    onAuthStateChanged(auth,async user=>{
+      if(!user){
+        window.location.replace('index.html');
+        return;
+      }
+      currentUser=user;
+      try{
+        targetUserId=await resolveTargetUser(user);
+        backButton.textContent=viewingAnotherPlayer?'← Painel do Mestre':'← Voltar ao Portal';
+        backButton.addEventListener('click',()=>window.location.href=viewingAnotherPlayer?'mestre.html':'inicio.html');
+        document.documentElement.classList.remove('auth-pending');
+        await loadTechniques();
+      }catch(error){
+        console.error('Falha ao validar acesso às técnicas:',error);
+        if(error?.message!=='Acesso administrativo necessário.'){
+          window.location.replace('inicio.html');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -289,6 +289,15 @@
       background:linear-gradient(90deg,#24576d,#4a9cc0,#74bed9,#d7b35e);
     }
 
+    .portal-card.techniques{
+      grid-column:1 / -1;
+      min-height:230px;
+    }
+
+    .portal-card.techniques::before{
+      background:linear-gradient(90deg,#6f281f,#c54b36,#d7b35e,#4a9cc0);
+    }
+
     .portal-card.master{
       display:none;
       grid-column:1 / -1;
@@ -333,6 +342,11 @@
     .portal-card.panel .card-icon{
       border-color:#315466;
       color:#78bad4;
+    }
+
+    .portal-card.techniques .card-icon{
+      border-color:#6b5132;
+      color:#e0c57b;
     }
 
     .card-content{position:relative;z-index:1;margin-top:28px}
@@ -404,7 +418,7 @@
     @media(max-width:760px){
       .grid{grid-template-columns:1fr}
       .portal-card{min-height:245px}
-      .portal-card.master{grid-column:auto}
+      .portal-card.master,.portal-card.techniques{grid-column:auto}
       .hero{min-height:255px}
     }
 
@@ -491,6 +505,25 @@
         </div>
       </a>
 
+      <a class="portal-card techniques" href="tecnicas.html">
+        <span class="card-symbol" aria-hidden="true">術</span>
+        <div>
+          <div class="card-icon" aria-hidden="true">術</div>
+          <div class="card-content">
+            <div class="card-kicker">Jutsu & Artes Shinobi</div>
+            <h3>Arquivo de Técnicas</h3>
+            <p>
+              Consulte e organize jutsus, custos de chakra, alcance, classificações,
+              requisitos e descrições das técnicas conhecidas pelo personagem.
+            </p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Abrir técnicas</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
       <a class="portal-card master" id="master-card" href="mestre.html" aria-hidden="true">
         <span class="card-symbol" aria-hidden="true">影</span>
         <div>
@@ -499,7 +532,7 @@
             <div class="card-kicker">Acesso Administrativo</div>
             <h3>Painel do Mestre</h3>
             <p>
-              Consulte os shinobi cadastrados e acesse as fichas e os painéis
+              Consulte os shinobi cadastrados e acesse fichas, painéis e técnicas
               individuais dos jogadores autorizados da campanha.
             </p>
           </div>
